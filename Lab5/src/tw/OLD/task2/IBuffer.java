@@ -1,4 +1,4 @@
-package tw.task2;
+package tw.OLD.task2;
 
 public interface IBuffer {
     void put(int size);
