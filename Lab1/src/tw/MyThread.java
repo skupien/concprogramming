@@ -8,6 +8,7 @@ public class MyThread implements Runnable {
         this.isIncrementing = isIncrementing;
     }
 
+    @Override
     public void run() {
         if(this.isIncrementing)
             for(int i=0; i<100000000; i++)
@@ -16,7 +17,7 @@ public class MyThread implements Runnable {
             for(int i=0; i<100000000; i++)
                 this.decrement();
 
-        System.out.println(num);
+        System.out.print("Non-synchronized: " + num + "\n");
     }
 
     void increment() {
