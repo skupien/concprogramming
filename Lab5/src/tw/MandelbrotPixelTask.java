@@ -9,21 +9,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import javax.swing.JFrame;
 
+import static java.lang.Math.sqrt;
+
 public class MandelbrotPixelTask extends JFrame {
 
-    private final int MAX_ITER = 5700;
+    private final int MAX_ITER = Main.MAX_ITER;
+    private final int THREADS = Main.THREADS;
     private final double ZOOM = 150;
     private BufferedImage I;
-    private double zx, zy, cX, cY, tmp;
 
-    public MandelbrotPixelTask() throws Exception {
+    public MandelbrotPixelTask(List<Long> values) throws Exception {
         super("Mandelbrot Set");
         setBounds(100, 100, 800, 600);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         I = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
 
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        ExecutorService pool = Executors.newFixedThreadPool(THREADS);
         List<Future<Integer>> list = new LinkedList<>();
 
         long startTime = System.nanoTime();
@@ -46,6 +48,7 @@ public class MandelbrotPixelTask extends JFrame {
         long stopTime = System.nanoTime();
 
         System.out.println((stopTime - startTime)/1000000 + "ms");
+        values.add((stopTime - startTime)/1000000);
     }
 
     @Override
@@ -53,7 +56,16 @@ public class MandelbrotPixelTask extends JFrame {
         g.drawImage(I, 0, 0, this);
     }
 
-    public static void main(String[] args) throws Exception {
-        new MandelbrotPixelTask().setVisible(true);
+    public static List<Long> main() throws Exception {
+        List<Long> values = new LinkedList<>();
+        for(int i =0; i<12; i++) {
+            if (i == 2) System.out.println("  breakpoint");
+            new MandelbrotPixelTask(values).setVisible(true);
+        }
+        long avg = (long) values.stream().skip(2).mapToDouble(a->a).average().getAsDouble();
+        double stdDeviation = sqrt(values.stream().skip(2).mapToDouble(a->(a-avg)*(a-avg)).sum() / ((double)values.size()-2.0));
+        values.set(0, avg);
+        values.set(1, (long)stdDeviation);
+        return values;
     }
 }
